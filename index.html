@@ -40,8 +40,105 @@
     </script>
     <script type="module" crossorigin src="./assets/index-5L0cXTdm.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-UI1A9sg_.css">
+    <style>
+      .full-report-wrap {
+        max-width: 1100px;
+        margin: 48px auto 96px;
+        padding: 0 16px;
+      }
+      .full-report-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+        padding: 20px;
+      }
+      .full-report-head h2 {
+        margin: 0 0 8px 0;
+        color: #0f172a;
+        font-size: 28px;
+      }
+      .full-report-head p {
+        margin: 0 0 16px 0;
+        color: #475569;
+      }
+      .full-report-actions button {
+        border: 0;
+        border-radius: 10px;
+        background: #0f172a;
+        color: #fff;
+        padding: 10px 14px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .full-report-content {
+        margin-top: 20px;
+        color: #1f2937;
+        line-height: 1.7;
+      }
+      .full-report-content h1,
+      .full-report-content h2,
+      .full-report-content h3 {
+        color: #0f172a;
+      }
+      .full-report-content table {
+        width: 100%;
+        border-collapse: collapse;
+        display: block;
+        overflow-x: auto;
+      }
+      .full-report-content th,
+      .full-report-content td {
+        border: 1px solid #e5e7eb;
+        padding: 6px 8px;
+        text-align: left;
+        white-space: nowrap;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    <section class="full-report-wrap">
+      <div class="full-report-card">
+        <div class="full-report-head">
+          <h2>Полная текстовая версия отчета</h2>
+          <p>Ниже подтягивается полный текст из исходного отчета без сокращений. Графики и интерактивная часть выше сохранены.</p>
+        </div>
+        <div class="full-report-actions">
+          <button id="toggle-full-report">Скрыть полный текст</button>
+        </div>
+        <article id="full-report-content" class="full-report-content"></article>
+      </div>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+      (function () {
+        var contentEl = document.getElementById("full-report-content");
+        var toggleBtn = document.getElementById("toggle-full-report");
+        var hidden = false;
+        fetch("./full-report.md")
+          .then(function (response) {
+            if (!response.ok) {
+              throw new Error("Cannot load full-report.md");
+            }
+            return response.text();
+          })
+          .then(function (markdown) {
+            if (!window.marked) {
+              contentEl.textContent = markdown;
+              return;
+            }
+            contentEl.innerHTML = window.marked.parse(markdown);
+          })
+          .catch(function () {
+            contentEl.innerHTML = "<p>Не удалось загрузить полный текст отчета. Обновите страницу через Ctrl+F5.</p>";
+          });
+        toggleBtn.addEventListener("click", function () {
+          hidden = !hidden;
+          contentEl.style.display = hidden ? "none" : "block";
+          toggleBtn.textContent = hidden ? "Показать полный текст" : "Скрыть полный текст";
+        });
+      })();
+    </script>
   </body>
 </html>
