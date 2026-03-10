@@ -116,6 +116,7 @@
         border-radius: 10px;
         padding: 10px 12px;
         font-size: 15px;
+        margin-top: 10px;
       }
       .lead-modal-actions {
         display: flex;
@@ -170,12 +171,22 @@
           <input type="hidden" name="_captcha" value="false" />
           <input type="hidden" name="_template" value="table" />
           <input type="hidden" name="_autoresponse" value="Спасибо за интерес к отчету. Ссылка на PDF: https://abdublinn.github.io/peredel-furniture-report/peredel-full-report.pdf" />
+          <input type="text" name="name" placeholder="Ваше имя" required />
+          <input type="text" name="company" placeholder="Компания (необязательно)" />
           <input
             type="email"
             name="email"
             placeholder="you@example.com"
             required
           />
+          <input type="hidden" name="utm_source" id="utm_source" />
+          <input type="hidden" name="utm_medium" id="utm_medium" />
+          <input type="hidden" name="utm_campaign" id="utm_campaign" />
+          <input type="hidden" name="utm_content" id="utm_content" />
+          <input type="hidden" name="utm_term" id="utm_term" />
+          <input type="hidden" name="page_url" id="page_url" />
+          <input type="hidden" name="referrer" id="referrer" />
+          <input type="hidden" name="submitted_at" id="submitted_at" />
           <div class="lead-modal-actions">
             <button type="submit" class="lead-submit">Отправить и скачать</button>
             <button type="button" class="lead-cancel" id="close-download-modal">Отмена</button>
@@ -188,16 +199,89 @@
 
     <script>
       (function () {
+        var GOOGLE_SHEETS_WEBHOOK_URL = "";
         var reportPdfUrl = "https://abdublinn.github.io/peredel-furniture-report/peredel-full-report.pdf";
         var modal = document.getElementById("download-modal");
         var openBtn = document.getElementById("open-download-modal");
         var closeBtn = document.getElementById("close-download-modal");
         var form = document.getElementById("download-form");
         var status = document.getElementById("lead-status");
+        var storageKey = "report_utm_params";
+
+        function getQueryParam(name) {
+          return new URLSearchParams(window.location.search).get(name) || "";
+        }
+
+        function resolveUtmValues() {
+          var current = {
+            utm_source: getQueryParam("utm_source"),
+            utm_medium: getQueryParam("utm_medium"),
+            utm_campaign: getQueryParam("utm_campaign"),
+            utm_content: getQueryParam("utm_content"),
+            utm_term: getQueryParam("utm_term")
+          };
+          var hasAny = Object.keys(current).some(function (k) { return current[k]; });
+          if (hasAny) {
+            localStorage.setItem(storageKey, JSON.stringify(current));
+            return current;
+          }
+          try {
+            var saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+            return {
+              utm_source: saved.utm_source || "",
+              utm_medium: saved.utm_medium || "",
+              utm_campaign: saved.utm_campaign || "",
+              utm_content: saved.utm_content || "",
+              utm_term: saved.utm_term || ""
+            };
+          } catch (e) {
+            return current;
+          }
+        }
+
+        function fillHiddenField(id, value) {
+          var el = document.getElementById(id);
+          if (el) el.value = value || "";
+        }
+
+        function populateTrackingFields() {
+          var utm = resolveUtmValues();
+          fillHiddenField("utm_source", utm.utm_source);
+          fillHiddenField("utm_medium", utm.utm_medium);
+          fillHiddenField("utm_campaign", utm.utm_campaign);
+          fillHiddenField("utm_content", utm.utm_content);
+          fillHiddenField("utm_term", utm.utm_term);
+          fillHiddenField("page_url", window.location.href);
+          fillHiddenField("referrer", document.referrer || "direct");
+          fillHiddenField("submitted_at", new Date().toISOString());
+        }
+
+        function sendToGoogleSheets() {
+          if (!GOOGLE_SHEETS_WEBHOOK_URL) return;
+          var payload = {
+            name: form.elements.name.value || "",
+            company: form.elements.company.value || "",
+            email: form.elements.email.value || "",
+            utm_source: document.getElementById("utm_source").value || "",
+            utm_medium: document.getElementById("utm_medium").value || "",
+            utm_campaign: document.getElementById("utm_campaign").value || "",
+            utm_content: document.getElementById("utm_content").value || "",
+            utm_term: document.getElementById("utm_term").value || "",
+            page_url: document.getElementById("page_url").value || "",
+            referrer: document.getElementById("referrer").value || "",
+            submitted_at: document.getElementById("submitted_at").value || ""
+          };
+          fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          }).catch(function () {});
+        }
 
         openBtn.addEventListener("click", function () {
           modal.classList.add("open");
           modal.setAttribute("aria-hidden", "false");
+          populateTrackingFields();
         });
 
         closeBtn.addEventListener("click", function () {
@@ -213,6 +297,8 @@
         });
 
         form.addEventListener("submit", function (event) {
+          populateTrackingFields();
+          sendToGoogleSheets();
           setTimeout(function () {
             status.style.display = "block";
           }, 600);
