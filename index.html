@@ -162,7 +162,7 @@
 
         <form
           id="download-form"
-          action="https://formsubmit.co/YOUR_EMAIL@example.com"
+          action="https://formsubmit.co/adublin@gmail.com"
           method="POST"
           target="lead-form-target"
         >
@@ -213,11 +213,6 @@
         });
 
         form.addEventListener("submit", function (event) {
-          if (form.action.indexOf("YOUR_EMAIL@example.com") !== -1) {
-            event.preventDefault();
-            alert("Нужно настроить e-mail получателя формы в index.html (заменить YOUR_EMAIL@example.com).");
-            return;
-          }
           setTimeout(function () {
             status.style.display = "block";
           }, 600);
