@@ -41,102 +41,195 @@
     <script type="module" crossorigin src="./assets/index-5L0cXTdm.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-UI1A9sg_.css">
     <style>
-      .full-report-wrap {
+      .lead-capture-wrap {
         max-width: 1100px;
-        margin: 48px auto 96px;
+        margin: 40px auto 96px;
         padding: 0 16px;
       }
-      .full-report-card {
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 16px;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
-        padding: 20px;
+      .lead-capture-card {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border: 1px solid #1f2937;
+        border-radius: 18px;
+        box-shadow: 0 8px 28px rgba(15, 23, 42, 0.35);
+        padding: 24px;
+        color: #e5e7eb;
       }
-      .full-report-head h2 {
+      .lead-capture-card h2 {
         margin: 0 0 8px 0;
-        color: #0f172a;
+        color: #fff;
         font-size: 28px;
       }
-      .full-report-head p {
-        margin: 0 0 16px 0;
-        color: #475569;
+      .lead-capture-card p {
+        margin: 0;
+        color: #cbd5e1;
       }
-      .full-report-actions button {
+      .lead-capture-btn {
+        margin-top: 16px;
         border: 0;
-        border-radius: 10px;
-        background: #0f172a;
-        color: #fff;
-        padding: 10px 14px;
+        border-radius: 12px;
+        background: #f59e0b;
+        color: #111827;
+        font-size: 15px;
+        font-weight: 700;
+        padding: 12px 16px;
         cursor: pointer;
-        font-size: 14px;
       }
-      .full-report-content {
-        margin-top: 20px;
-        color: #1f2937;
-        line-height: 1.7;
+      .lead-capture-note {
+        margin-top: 8px;
+        font-size: 12px;
+        color: #94a3b8;
       }
-      .full-report-content h1,
-      .full-report-content h2,
-      .full-report-content h3 {
+      .lead-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.65);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        z-index: 9999;
+      }
+      .lead-modal.open {
+        display: flex;
+      }
+      .lead-modal-card {
+        width: 100%;
+        max-width: 460px;
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+        padding: 20px;
+      }
+      .lead-modal-card h3 {
+        margin: 0 0 8px 0;
         color: #0f172a;
       }
-      .full-report-content table {
-        width: 100%;
-        border-collapse: collapse;
-        display: block;
-        overflow-x: auto;
+      .lead-modal-card p {
+        margin: 0 0 14px 0;
+        color: #475569;
+        font-size: 14px;
       }
-      .full-report-content th,
-      .full-report-content td {
-        border: 1px solid #e5e7eb;
-        padding: 6px 8px;
-        text-align: left;
-        white-space: nowrap;
+      .lead-modal-card input {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 15px;
+      }
+      .lead-modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .lead-modal-actions button {
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 12px;
+        cursor: pointer;
+      }
+      .lead-submit {
+        background: #0f172a;
+        color: #fff;
+      }
+      .lead-cancel {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+      .lead-status {
+        margin-top: 10px;
+        font-size: 13px;
+        color: #0f766e;
+        display: none;
       }
     </style>
   </head>
   <body>
     <div id="root"></div>
-    <section class="full-report-wrap">
-      <div class="full-report-card">
-        <div class="full-report-head">
-          <h2>Полная текстовая версия отчета</h2>
-          <p>Ниже подтягивается полный текст из исходного отчета без сокращений. Графики и интерактивная часть выше сохранены.</p>
-        </div>
-        <div class="full-report-actions">
-          <button id="toggle-full-report">Скрыть полный текст</button>
-        </div>
-        <article id="full-report-content" class="full-report-content"></article>
+    <section class="lead-capture-wrap">
+      <div class="lead-capture-card">
+        <h2>Скачать полную версию отчета</h2>
+        <p>Оставьте e-mail — отправим письмо со ссылкой на PDF-версию полного отчета.</p>
+        <button class="lead-capture-btn" id="open-download-modal">Скачать полную версию отчета</button>
+        <div class="lead-capture-note">После отправки формы письмо приходит автоматически.</div>
       </div>
     </section>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <div class="lead-modal" id="download-modal" aria-hidden="true">
+      <div class="lead-modal-card">
+        <h3>Получить PDF на e-mail</h3>
+        <p>Введите адрес почты, и мы отправим письмо с ссылкой на полный отчет.</p>
+
+        <form
+          id="download-form"
+          action="https://formsubmit.co/YOUR_EMAIL@example.com"
+          method="POST"
+          target="lead-form-target"
+        >
+          <input type="hidden" name="_subject" value="Запрос PDF: Передел. Мебельный рынок 2018-2026" />
+          <input type="hidden" name="_captcha" value="false" />
+          <input type="hidden" name="_template" value="table" />
+          <input type="hidden" name="_autoresponse" value="Спасибо за интерес к отчету. Ссылка на PDF: https://abdublinn.github.io/peredel-furniture-report/peredel-full-report.pdf" />
+          <input
+            type="email"
+            name="email"
+            placeholder="you@example.com"
+            required
+          />
+          <div class="lead-modal-actions">
+            <button type="submit" class="lead-submit">Отправить и скачать</button>
+            <button type="button" class="lead-cancel" id="close-download-modal">Отмена</button>
+          </div>
+          <div class="lead-status" id="lead-status">Спасибо! Проверьте почту — письмо уже отправлено.</div>
+        </form>
+      </div>
+    </div>
+    <iframe name="lead-form-target" style="display:none;"></iframe>
+
     <script>
       (function () {
-        var contentEl = document.getElementById("full-report-content");
-        var toggleBtn = document.getElementById("toggle-full-report");
-        var hidden = false;
-        fetch("./full-report.md")
-          .then(function (response) {
-            if (!response.ok) {
-              throw new Error("Cannot load full-report.md");
-            }
-            return response.text();
-          })
-          .then(function (markdown) {
-            if (!window.marked) {
-              contentEl.textContent = markdown;
-              return;
-            }
-            contentEl.innerHTML = window.marked.parse(markdown);
-          })
-          .catch(function () {
-            contentEl.innerHTML = "<p>Не удалось загрузить полный текст отчета. Обновите страницу через Ctrl+F5.</p>";
-          });
-        toggleBtn.addEventListener("click", function () {
-          hidden = !hidden;
-          contentEl.style.display = hidden ? "none" : "block";
-          toggleBtn.textContent = hidden ? "Показать полный текст" : "Скрыть полный текст";
+        var reportPdfUrl = "https://abdublinn.github.io/peredel-furniture-report/peredel-full-report.pdf";
+        var modal = document.getElementById("download-modal");
+        var openBtn = document.getElementById("open-download-modal");
+        var closeBtn = document.getElementById("close-download-modal");
+        var form = document.getElementById("download-form");
+        var status = document.getElementById("lead-status");
+
+        openBtn.addEventListener("click", function () {
+          modal.classList.add("open");
+          modal.setAttribute("aria-hidden", "false");
+        });
+
+        closeBtn.addEventListener("click", function () {
+          modal.classList.remove("open");
+          modal.setAttribute("aria-hidden", "true");
+        });
+
+        modal.addEventListener("click", function (event) {
+          if (event.target === modal) {
+            modal.classList.remove("open");
+            modal.setAttribute("aria-hidden", "true");
+          }
+        });
+
+        form.addEventListener("submit", function (event) {
+          if (form.action.indexOf("YOUR_EMAIL@example.com") !== -1) {
+            event.preventDefault();
+            alert("Нужно настроить e-mail получателя формы в index.html (заменить YOUR_EMAIL@example.com).");
+            return;
+          }
+          setTimeout(function () {
+            status.style.display = "block";
+          }, 600);
+          setTimeout(function () {
+            window.open(reportPdfUrl, "_blank");
+          }, 1000);
+          setTimeout(function () {
+            modal.classList.remove("open");
+            modal.setAttribute("aria-hidden", "true");
+            status.style.display = "none";
+            form.reset();
+          }, 2200);
         });
       })();
     </script>
