@@ -259,9 +259,9 @@
           fillHiddenField("request_id", Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8));
         }
 
-        function sendToGoogleSheets() {
+        function sendToGoogleSheets(payloadOverride) {
           if (!GOOGLE_SHEETS_WEBHOOK_URL) return;
-          var payload = {
+          var payload = payloadOverride || {
             name: form.elements.name.value || "",
             company: form.elements.company.value || "",
             phone: form.elements.phone.value || "",
@@ -304,8 +304,28 @@
 
         form.addEventListener("submit", function (event) {
           event.preventDefault();
+          if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+          }
           populateTrackingFields();
-          sendToGoogleSheets();
+          var fd = new FormData(form);
+          var payload = {
+            name: (fd.get("name") || "").toString().trim(),
+            company: (fd.get("company") || "").toString().trim(),
+            phone: (fd.get("phone") || "").toString().trim(),
+            email: (fd.get("email") || "").toString().trim(),
+            utm_source: (fd.get("utm_source") || "").toString(),
+            utm_medium: (fd.get("utm_medium") || "").toString(),
+            utm_campaign: (fd.get("utm_campaign") || "").toString(),
+            utm_content: (fd.get("utm_content") || "").toString(),
+            utm_term: (fd.get("utm_term") || "").toString(),
+            page_url: (fd.get("page_url") || "").toString(),
+            referrer: (fd.get("referrer") || "").toString(),
+            submitted_at: (fd.get("submitted_at") || "").toString(),
+            request_id: (fd.get("request_id") || "").toString()
+          };
+          sendToGoogleSheets(payload);
           // Email is sent by Apps Script webhook (single source of truth).
           setTimeout(function () {
             status.style.display = "block";
