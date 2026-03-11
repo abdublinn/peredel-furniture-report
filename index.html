@@ -271,11 +271,25 @@
             referrer: document.getElementById("referrer").value || "",
             submitted_at: document.getElementById("submitted_at").value || ""
           };
-          fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          }).catch(function () {});
+          var payloadJson = JSON.stringify(payload);
+          var sent = false;
+          if (navigator.sendBeacon) {
+            try {
+              var blob = new Blob([payloadJson], { type: "text/plain;charset=UTF-8" });
+              sent = navigator.sendBeacon(GOOGLE_SHEETS_WEBHOOK_URL, blob);
+            } catch (e) {
+              sent = false;
+            }
+          }
+          if (!sent) {
+            fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
+              method: "POST",
+              mode: "no-cors",
+              keepalive: true,
+              headers: { "Content-Type": "text/plain;charset=UTF-8" },
+              body: payloadJson
+            }).catch(function () {});
+          }
         }
 
         openBtn.addEventListener("click", function () {
