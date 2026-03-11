@@ -163,7 +163,7 @@
 
         <form
           id="download-form"
-          action="https://formsubmit.co/adublin@gmail.com"
+          action="#"
           method="POST"
           target="lead-form-target"
         >
@@ -306,8 +306,7 @@
           event.preventDefault();
           populateTrackingFields();
           sendToGoogleSheets();
-          // Use standard formsubmit endpoint (more reliable for autoresponse emails).
-          form.submit();
+          // Email is sent by Apps Script webhook (single source of truth).
           setTimeout(function () {
             status.style.display = "block";
           }, 200);
