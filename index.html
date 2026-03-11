@@ -188,6 +188,7 @@
           <input type="hidden" name="page_url" id="page_url" />
           <input type="hidden" name="referrer" id="referrer" />
           <input type="hidden" name="submitted_at" id="submitted_at" />
+          <input type="hidden" name="request_id" id="request_id" />
           <div class="lead-modal-actions">
             <button type="submit" class="lead-submit">Отправить и скачать</button>
             <button type="button" class="lead-cancel" id="close-download-modal">Отмена</button>
@@ -255,6 +256,7 @@
           fillHiddenField("page_url", window.location.href);
           fillHiddenField("referrer", document.referrer || "direct");
           fillHiddenField("submitted_at", new Date().toISOString());
+          fillHiddenField("request_id", Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8));
         }
 
         function sendToGoogleSheets() {
@@ -271,29 +273,10 @@
             utm_term: document.getElementById("utm_term").value || "",
             page_url: document.getElementById("page_url").value || "",
             referrer: document.getElementById("referrer").value || "",
-            submitted_at: document.getElementById("submitted_at").value || ""
+            submitted_at: document.getElementById("submitted_at").value || "",
+            request_id: document.getElementById("request_id").value || ""
           };
-          var payloadJson = JSON.stringify(payload);
-          var sent = false;
-          if (navigator.sendBeacon) {
-            try {
-              var blob = new Blob([payloadJson], { type: "text/plain;charset=UTF-8" });
-              sent = navigator.sendBeacon(GOOGLE_SHEETS_WEBHOOK_URL, blob);
-            } catch (e) {
-              sent = false;
-            }
-          }
-          if (!sent) {
-            fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
-              method: "POST",
-              mode: "no-cors",
-              keepalive: true,
-              headers: { "Content-Type": "text/plain;charset=UTF-8" },
-              body: payloadJson
-            }).catch(function () {});
-          }
-          // Hard fallback for Apps Script: trigger doGet with query params.
-          // This works even when browser blocks cross-origin POST details.
+          // Single-channel send to avoid duplicate rows: doGet with query params.
           try {
             var qs = new URLSearchParams(payload).toString();
             var img = new Image();
