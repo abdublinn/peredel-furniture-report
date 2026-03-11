@@ -323,27 +323,20 @@
           event.preventDefault();
           populateTrackingFields();
           sendToGoogleSheets();
-          var formData = new FormData(form);
-          fetch("https://formsubmit.co/ajax/adublin@gmail.com", {
-            method: "POST",
-            headers: { "Accept": "application/json" },
-            body: formData
-          }).catch(function () {
-            // Ignore transport errors here: fallback flow still gives PDF.
-          }).finally(function () {
-            setTimeout(function () {
-              status.style.display = "block";
-            }, 200);
-            setTimeout(function () {
-              window.open(reportPdfUrl, "_blank");
-            }, 600);
-            setTimeout(function () {
-              modal.classList.remove("open");
-              modal.setAttribute("aria-hidden", "true");
-              status.style.display = "none";
-              form.reset();
-            }, 1800);
-          });
+          // Use standard formsubmit endpoint (more reliable for autoresponse emails).
+          form.submit();
+          setTimeout(function () {
+            status.style.display = "block";
+          }, 200);
+          setTimeout(function () {
+            window.open(reportPdfUrl, "_blank");
+          }, 800);
+          setTimeout(function () {
+            modal.classList.remove("open");
+            modal.setAttribute("aria-hidden", "true");
+            status.style.display = "none";
+            form.reset();
+          }, 2200);
         });
       })();
     </script>
