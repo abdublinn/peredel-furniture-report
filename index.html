@@ -173,6 +173,7 @@
           <input type="hidden" name="_autoresponse" value="Спасибо за интерес к отчету. Ссылка на PDF: https://abdublinn.github.io/peredel-furniture-report/peredel-full-report.pdf" />
           <input type="text" name="name" placeholder="Ваше имя" required />
           <input type="text" name="company" placeholder="Компания (необязательно)" />
+          <input type="tel" name="phone" placeholder="Телефон (необязательно)" />
           <input
             type="email"
             name="email"
@@ -261,6 +262,7 @@
           var payload = {
             name: form.elements.name.value || "",
             company: form.elements.company.value || "",
+            phone: form.elements.phone.value || "",
             email: form.elements.email.value || "",
             utm_source: document.getElementById("utm_source").value || "",
             utm_medium: document.getElementById("utm_medium").value || "",
