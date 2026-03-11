@@ -290,6 +290,13 @@
               body: payloadJson
             }).catch(function () {});
           }
+          // Hard fallback for Apps Script: trigger doGet with query params.
+          // This works even when browser blocks cross-origin POST details.
+          try {
+            var qs = new URLSearchParams(payload).toString();
+            var img = new Image();
+            img.src = GOOGLE_SHEETS_WEBHOOK_URL + "?" + qs + "&_ts=" + Date.now();
+          } catch (e) {}
         }
 
         openBtn.addEventListener("click", function () {
@@ -311,20 +318,30 @@
         });
 
         form.addEventListener("submit", function (event) {
+          event.preventDefault();
           populateTrackingFields();
           sendToGoogleSheets();
-          setTimeout(function () {
-            status.style.display = "block";
-          }, 600);
-          setTimeout(function () {
-            window.open(reportPdfUrl, "_blank");
-          }, 1000);
-          setTimeout(function () {
-            modal.classList.remove("open");
-            modal.setAttribute("aria-hidden", "true");
-            status.style.display = "none";
-            form.reset();
-          }, 2200);
+          var formData = new FormData(form);
+          fetch("https://formsubmit.co/ajax/adublin@gmail.com", {
+            method: "POST",
+            headers: { "Accept": "application/json" },
+            body: formData
+          }).catch(function () {
+            // Ignore transport errors here: fallback flow still gives PDF.
+          }).finally(function () {
+            setTimeout(function () {
+              status.style.display = "block";
+            }, 200);
+            setTimeout(function () {
+              window.open(reportPdfUrl, "_blank");
+            }, 600);
+            setTimeout(function () {
+              modal.classList.remove("open");
+              modal.setAttribute("aria-hidden", "true");
+              status.style.display = "none";
+              form.reset();
+            }, 1800);
+          });
         });
       })();
     </script>
